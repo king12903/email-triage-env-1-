@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional
 
 app = FastAPI()
 
+# Environment state
 current_email = {
     "id": 1,
     "content": "Customer is asking for a refund for a damaged product."
@@ -21,24 +21,25 @@ def root():
     return {"status": "ok"}
 
 
+# RESET ENDPOINT
 @app.post("/reset")
 def reset():
     global current_email, done
 
     done = False
-
     current_email = {
         "id": 1,
         "content": "Customer is asking for a refund for a damaged product."
     }
 
     return {
-        "task": "Handle the incoming customer email",
         "observation": current_email["content"],
+        "reward": 0,
         "done": False
     }
 
 
+# STEP ENDPOINT
 @app.post("/step")
 def step(request: ActionRequest):
     global done
@@ -59,6 +60,7 @@ def step(request: ActionRequest):
     }
 
 
+# STATE ENDPOINT
 @app.get("/state")
 def state():
     return {
