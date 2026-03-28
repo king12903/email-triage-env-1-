@@ -1,19 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Body
 from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI()
 
-# Environment state
 current_email = {
     "id": 1,
     "content": "Customer is asking for a refund for a damaged product."
 }
 
 done = False
-
-
-class ResetRequest(BaseModel):
-    dummy: str | None = None
 
 
 class ActionRequest(BaseModel):
@@ -25,8 +21,9 @@ def root():
     return {"status": "ok"}
 
 
+# RESET ENDPOINT
 @app.post("/reset")
-def reset(request: ResetRequest):
+def reset(body: Optional[dict] = Body(None)):
     global current_email, done
 
     done = False
@@ -43,6 +40,7 @@ def reset(request: ResetRequest):
     }
 
 
+# STEP ENDPOINT
 @app.post("/step")
 def step(request: ActionRequest):
     global done
