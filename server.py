@@ -3,9 +3,9 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# ---------------------------
-# Environment State
-# ---------------------------
+# -----------------------------
+# Environment state
+# -----------------------------
 
 current_email = {
     "id": 1,
@@ -15,32 +15,34 @@ current_email = {
 done = False
 
 
-# ---------------------------
-# Request Model
-# ---------------------------
+# -----------------------------
+# Action model
+# -----------------------------
 
-class Action(BaseModel):
+class ActionRequest(BaseModel):
     action: str
 
 
-# ---------------------------
-# Root Endpoint
-# ---------------------------
+# -----------------------------
+# Root endpoint
+# -----------------------------
 
 @app.get("/")
 def root():
     return {"status": "ok"}
 
 
-# ---------------------------
-# Reset Environment
-# ---------------------------
+# -----------------------------
+# Reset endpoint
+# IMPORTANT: no request body
+# -----------------------------
 
 @app.post("/reset")
 def reset():
     global current_email, done
 
     done = False
+
     current_email = {
         "id": 1,
         "content": "Customer is asking for a refund for a damaged product."
@@ -48,21 +50,26 @@ def reset():
 
     return {
         "task": "Handle the incoming customer email",
-        "observation": current_email["content"]
+        "observation": current_email["content"],
+        "done": False
     }
 
 
-# ---------------------------
-# Step Function
-# ---------------------------
+# -----------------------------
+# Step endpoint
+# -----------------------------
 
 @app.post("/step")
-def step(action: Action):
+def step(request: ActionRequest):
     global done
 
     correct_action = "reply"
 
-    reward = 1 if action.action.lower() == correct_action else 0
+    if request.action.lower() == correct_action:
+        reward = 1
+    else:
+        reward = 0
+
     done = True
 
     return {
@@ -72,9 +79,9 @@ def step(action: Action):
     }
 
 
-# ---------------------------
-# State Endpoint
-# ---------------------------
+# -----------------------------
+# State endpoint
+# -----------------------------
 
 @app.get("/state")
 def state():
