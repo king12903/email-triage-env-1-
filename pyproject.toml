@@ -1,0 +1,6 @@
+[project]
+name = "email-triage-env"
+version = "0.1.0"
+description = "Email triage environment for OpenEnv"
+authors = [{name = "King"}]
+requires-python = ">=3.9"
