@@ -4,10 +4,6 @@ from typing import Optional
 
 app = FastAPI()
 
-# -----------------------------
-# Environment state
-# -----------------------------
-
 current_email = {
     "id": 1,
     "content": "Customer is asking for a refund for a damaged product."
@@ -16,33 +12,17 @@ current_email = {
 done = False
 
 
-# -----------------------------
-# Action request model
-# -----------------------------
-
 class ActionRequest(BaseModel):
     action: str
 
-
-class ResetRequest(BaseModel):
-    dummy: Optional[str] = None
-
-
-# -----------------------------
-# Root endpoint
-# -----------------------------
 
 @app.get("/")
 def root():
     return {"status": "ok"}
 
 
-# -----------------------------
-# Reset endpoint
-# -----------------------------
-
 @app.post("/reset")
-def reset(request: Optional[ResetRequest] = None):
+def reset():
     global current_email, done
 
     done = False
@@ -58,10 +38,6 @@ def reset(request: Optional[ResetRequest] = None):
         "done": False
     }
 
-
-# -----------------------------
-# Step endpoint
-# -----------------------------
 
 @app.post("/step")
 def step(request: ActionRequest):
@@ -82,10 +58,6 @@ def step(request: ActionRequest):
         "done": done
     }
 
-
-# -----------------------------
-# State endpoint
-# -----------------------------
 
 @app.get("/state")
 def state():
