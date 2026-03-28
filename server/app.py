@@ -12,20 +12,21 @@ current_email = {
 done = False
 
 
-# Request schema
+class ResetRequest(BaseModel):
+    pass
+
+
 class ActionRequest(BaseModel):
     action: str
 
 
-# Root endpoint
 @app.get("/")
 def root():
     return {"status": "ok"}
 
 
-# Reset environment
 @app.post("/reset")
-def reset():
+def reset(req: ResetRequest):
     global current_email, done
 
     done = False
@@ -41,7 +42,6 @@ def reset():
     }
 
 
-# Step endpoint
 @app.post("/step")
 def step(request: ActionRequest):
     global done
@@ -62,7 +62,6 @@ def step(request: ActionRequest):
     }
 
 
-# State endpoint
 @app.get("/state")
 def state():
     return {
