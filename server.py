@@ -12,6 +12,10 @@ current_email = {
 done = False
 
 
+class ResetRequest(BaseModel):
+    dummy: str | None = None
+
+
 class ActionRequest(BaseModel):
     action: str
 
@@ -21,12 +25,12 @@ def root():
     return {"status": "ok"}
 
 
-# RESET ENDPOINT
 @app.post("/reset")
-def reset():
+def reset(request: ResetRequest):
     global current_email, done
 
     done = False
+
     current_email = {
         "id": 1,
         "content": "Customer is asking for a refund for a damaged product."
@@ -39,7 +43,6 @@ def reset():
     }
 
 
-# STEP ENDPOINT
 @app.post("/step")
 def step(request: ActionRequest):
     global done
@@ -60,7 +63,6 @@ def step(request: ActionRequest):
     }
 
 
-# STATE ENDPOINT
 @app.get("/state")
 def state():
     return {
