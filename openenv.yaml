@@ -1,0 +1,2 @@
+name: email-triage-env
+entry_point: server:app
