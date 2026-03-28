@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI()
 
@@ -16,11 +17,15 @@ done = False
 
 
 # -----------------------------
-# Action model
+# Action request model
 # -----------------------------
 
 class ActionRequest(BaseModel):
     action: str
+
+
+class ResetRequest(BaseModel):
+    dummy: Optional[str] = None
 
 
 # -----------------------------
@@ -34,11 +39,10 @@ def root():
 
 # -----------------------------
 # Reset endpoint
-# IMPORTANT: no request body
 # -----------------------------
 
 @app.post("/reset")
-def reset():
+def reset(request: Optional[ResetRequest] = None):
     global current_email, done
 
     done = False
