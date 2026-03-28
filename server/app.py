@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# Global state
 current_email = {
     "id": 1,
     "content": "Customer is asking for a refund for a damaged product."
@@ -11,15 +12,18 @@ current_email = {
 done = False
 
 
+# Request schema
 class ActionRequest(BaseModel):
     action: str
 
 
+# Root endpoint
 @app.get("/")
 def root():
     return {"status": "ok"}
 
 
+# Reset environment
 @app.post("/reset")
 def reset():
     global current_email, done
@@ -32,12 +36,12 @@ def reset():
     }
 
     return {
-        "task": "Handle the incoming customer email",
         "observation": current_email["content"],
         "done": False
     }
 
 
+# Step endpoint
 @app.post("/step")
 def step(request: ActionRequest):
     global done
@@ -58,6 +62,7 @@ def step(request: ActionRequest):
     }
 
 
+# State endpoint
 @app.get("/state")
 def state():
     return {
