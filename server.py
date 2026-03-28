@@ -1,52 +1,84 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Optional
-import uvicorn
-
-from environment import EmailTriageEnv, Action
 
 app = FastAPI()
-envs = {}
 
-class ResetRequest(BaseModel):
-    task_id: str = "easy"
+# ---------------------------
+# Environment State
+# ---------------------------
 
-class StepRequest(BaseModel):
-    task_id: str
-    priority: str
-    category: str
-    should_reply: bool
-    reply_text: Optional[str] = None
+current_email = {
+    "id": 1,
+    "content": "Customer is asking for a refund for a damaged product."
+}
+
+done = False
+
+
+# ---------------------------
+# Request Model
+# ---------------------------
+
+class Action(BaseModel):
+    action: str
+
+
+# ---------------------------
+# Root Endpoint
+# ---------------------------
 
 @app.get("/")
 def root():
     return {"status": "ok"}
 
+
+# ---------------------------
+# Reset Environment
+# ---------------------------
+
 @app.post("/reset")
-def reset(req: ResetRequest):
-    env = EmailTriageEnv(req.task_id)
-    envs[req.task_id] = env
-    return env.reset().dict()
+def reset():
+    global current_email, done
 
-@app.post("/step")
-def step(req: StepRequest):
-    env = envs.get(req.task_id)
-    if not env:
-        raise HTTPException(400, "Reset first")
-
-    action = Action(**req.dict())
-    obs, reward, done, _ = env.step(action)
+    done = False
+    current_email = {
+        "id": 1,
+        "content": "Customer is asking for a refund for a damaged product."
+    }
 
     return {
-        "observation": obs.dict() if obs else None,
-        "reward": reward.dict(),
+        "task": "Handle the incoming customer email",
+        "observation": current_email["content"]
+    }
+
+
+# ---------------------------
+# Step Function
+# ---------------------------
+
+@app.post("/step")
+def step(action: Action):
+    global done
+
+    correct_action = "reply"
+
+    reward = 1 if action.action.lower() == correct_action else 0
+    done = True
+
+    return {
+        "observation": "Action processed",
+        "reward": reward,
         "done": done
     }
 
-@app.get("/state")
-def state(task_id: str):
-    env = envs.get(task_id)
-    return env.state().dict()
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+# ---------------------------
+# State Endpoint
+# ---------------------------
+
+@app.get("/state")
+def state():
+    return {
+        "email": current_email,
+        "done": done
+    }
